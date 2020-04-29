@@ -1,30 +1,18 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
+from  werkzeug.security  import   safe_str_cmp
+from   user  import  User
 
-app = Flask(__name__)
-api = Api(app)
+users  =  [
+            User (1, 'sainathdorthala', 'asdf'  )
+]
 
-items = []
+username_mapping = {u.username: u for u in users  }
+userid_mapping = {u.id: u for u in users}
 
-class Item(Resource):
-    def get(self, name):
-        for item in items:
-            if item['name'] == name:
-                return item
-        return {'item': None}, 404
+def  authenticate(username, password):
+     user = username_mapping. get(username, None)
+     if user and safe_str_cmp(user.password , password):
+        return user
 
-    def post(self, name):
-            data = request.get_json()
-            item = {'name': name, 'price': data['price']}
-            items.append(item)
-            return item, 201
-
-
-class ItemList(Resource):
-    def get(self):
-        return {'items': items}
-
-api.add_resource(Item, '/item/<string:name>')
-api.add_resource(ItemList, '/items')
-
-app.run(port=5000, debug=True)
+def  identity (payload) :
+        user_id = payload ['identity']
+        return userid_mapping.get(user_id, None)
